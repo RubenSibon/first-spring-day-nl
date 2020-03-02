@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eerste lente dag per jaar sinds 1931</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <p>
+    The first spring day in the Netherlands is defined by the KNMI as the first day of the year on which the maximum
+    temperature exceded 15 degrees celsius.
+  </p>
+
+  <div class="grid">
+    <div class="axis-y-legend">
+      <span>N dagen t/m eerste lentedag</span>
+    </div>
+    <div id="axisY" class="axis-y"></div>
+    <div id="barchart" class="barchart"></div>
+    <div id="axisX" class="axis-x"></div>
+    <div class="axis-x-legend">
+      <span>Jaren</span>
+    </div>
+  </div>
+
+  <div id="resultsLog">
+    <h2>Eerste lentedag van elk jaar</h2>
+  </div>
+
+  <script src="tempsPerDay1931to2019.js"></script>
+  <script src="firstSpringDay.js"></script>
+</body>
+
+</html>
