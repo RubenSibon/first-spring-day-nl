@@ -75,8 +75,6 @@
   const firstSpringDayForYear = (tempsInYear) => {
     const filtered = tempsInYear.filter(day => day.maxC >= 15);
 
-    console.log(filtered);
-
     return filtered.length > 0 ? new Date(filtered[0].date) : "It was a very cold year... No days with temperatures above 15 degrees celsius! 0_o";
   };
 
@@ -155,10 +153,9 @@
       nodeYear.innerHTML = `'${twoDigitYear}`;
       $axisX.appendChild(nodeYear);
 
-      // Log result to page and console.
+      // Log result to page.
       nodeLog.innerHTML = logResult(firstSpringDay);
       $resultsLog.appendChild(nodeLog);
-      console.log(logResult(firstSpringDay));
 
       // Add the bar to the chart.
       $barchart.appendChild(nodeLine);
