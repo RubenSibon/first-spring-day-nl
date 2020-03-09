@@ -1,87 +1,12 @@
 import getWeatherData from "./dataHandling.js";
+import { daysInMonth, dataOfYear, splitDatasetIntoYears, firstSpringDayForYear, firstSpringDayPerEachYear, logResult } from "./firstSpringDay.js";
 
 let tempsPerDay;
 
 /**
-  * Get the number of days in a given month.
-  *
-  * @param {number} month - Month in MM format (use current month if undefined).
-  * @param {number} year - Year in YYYY format (use current year if undefined).
-  *
-  * @returns {number}
-**/
-const daysInMonth = (year = (new Date().getFullYear()), month = (new Date().getMonth())) => {
-  return new Date(year, month, 0).getDate();
-}
-
-/**
-  * Extract the data of a year from a given dataset.
-  *
-  * @param {number} year - Year in YYYY format.
-  * @param {Array} dataset
-  *
-  * @returns {Array}
-**/
-const dataOfYear = (year = (new Date().getFullYear()), dataset = tempsPerDay) => {
-  console.log(dataset);
-
-  return dataset.filter(day => day.date.startsWith(year));
-};
-
-/**
-  * Create object from array with dataset per year.
-  *
-  * @param {Function} fn - Get the data of a year.
-  *
-  * @returns {Object}
-**/
-const splitDatasetIntoYears = (fn = dataOfYear) => {
-  let perYearObject = {};
-
-  for (let year = 1931; year < 2020; year++) {
-    perYearObject[`year${year}`] = {
-      year,
-      dataset: fn(year),
-    };
-  }
-
-  return perYearObject;
-};
-
-/**
-  * Get the first spring day.
-  *
-  * @param {Array} dataset
-  *
-  * @returns {Date|string} Date of first spring day or a string if it was an unusually cold year (improbable).
-**/
-const firstSpringDayForYear = (tempsInYear) => {
-  const filtered = tempsInYear.filter(day => day.maxC >= 15);
-
-  return filtered.length > 0 ? new Date(filtered[0].date) : "It was a very cold year... No days with temperatures above 15 degrees celsius! 0_o";
-};
-
-const firstSpringDayPerEachYear = (yearsObj) => {
-  return Object.values(yearsObj).map(({ dataset }) => {
-    return firstSpringDayForYear(dataset);
-  });
-};
-
-/**
-  * Log the result in a Dutch sentence.
-  *
-  * @param {Date} result - Date of the first spring day.
-  *
-  * @returns {string}
-**/
-const logResult = (result) => {
-  return `De eerste lentedag van ${result.getFullYear()} was ${result.toLocaleDateString("nl-NL")}`;
-};
-
-/**
-  * Draw the graph and write the logs (side effects)
-  *
-  * @todo Break this monster function up...
+ * Draw the graph and write the logs (side effects)
+ *
+ * @todo Break this monster function up...
 **/
 const drawResults = () => {
   const ZOOM_MULTIPLIER = 4;
@@ -92,7 +17,7 @@ const drawResults = () => {
   const $resultsLog = document.querySelector("#resultsLog");
 
   const lineStyles = { margin: "0 1px", width: "8px", height: 0 };
-  const getFirstSpringDayPerYear = firstSpringDayPerEachYear(splitDatasetIntoYears(dataOfYear));
+  const getFirstSpringDayPerYear = firstSpringDayPerEachYear(splitDatasetIntoYears(dataOfYear, tempsPerDay));
 
   // @todo Create table with data ("Number of days since January 1st" and "Date of first spring day" in two columns)
   // const nodeTable = document.createElement("table");
@@ -135,7 +60,7 @@ const drawResults = () => {
     // Add the value of the bar to an array.
     lineData.push({ 
       year: firstSpringDay.getFullYear(),
-      value,     
+      value,
     });
 
     // Apply styling to bar.
@@ -178,6 +103,9 @@ const drawResults = () => {
   });
 };
 
+/**
+ * Initialize render after getting the dataset.
+**/
 (async function() {
   try {
     const weatherData = await getWeatherData();
@@ -185,11 +113,9 @@ const drawResults = () => {
     return weatherData;
   } catch (error) {
     console.error(error);
-    alert("An unknown problem occured. Please try again by reloading the page.");
+    alert("An unknown problem occured. ¯\_(ツ)_/¯ Please try again by reloading the page.");
   }
 })().then(data => {
-  console.log(data);
-
   tempsPerDay = data;
 
   drawResults();
