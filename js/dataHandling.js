@@ -6,7 +6,7 @@ export default async function getWeatherData() {
 
   try {
     /**
-     * Expected result: an array with objects, one for each day from january 1931 up to january 2020.
+     * Expected result: an array with objects, one for each day from January 1906 up to January 2020.
      *
      * Each object is/should be formatted as follows:
      *

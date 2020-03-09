@@ -6,7 +6,7 @@
  *
  * @returns {number}
 **/
-export const daysInMonth = (year = (new Date().getFullYear()), month = (new Date().getMonth())) => {
+export function daysInMonth (year = (new Date().getFullYear()), month = (new Date().getMonth())) {
   return new Date(year, month, 0).getDate();
 }
 
@@ -18,7 +18,7 @@ export const daysInMonth = (year = (new Date().getFullYear()), month = (new Date
  *
  * @returns {Array}
 **/
-export const dataOfYear = (dataset, year = (new Date().getFullYear())) => {
+export function dataOfYear (dataset, year = (new Date().getFullYear())) {
   try {
     if (dataset) {
       return dataset.filter(day => day.date.startsWith(year));
@@ -27,7 +27,7 @@ export const dataOfYear = (dataset, year = (new Date().getFullYear())) => {
     const msg = "There is no dataset to work on.";
 
     console.error(msg);
-    console.error(error);
+    console.error("System error:", error);
 
     alert(msg);
   }
@@ -41,7 +41,7 @@ export const dataOfYear = (dataset, year = (new Date().getFullYear())) => {
  *
  * @returns {Object}
 **/
-export const splitDatasetIntoYears = (fn = dataOfYear, dataset) => {
+export function splitDatasetIntoYears (fn = dataOfYear, dataset) {
   let perYearObject = {};
 
   /**
@@ -64,7 +64,7 @@ export const splitDatasetIntoYears = (fn = dataOfYear, dataset) => {
  *
  * @returns {Date|string} Date of first spring day or a string if it was an unusually cold year (improbable).
 **/
-export const firstSpringDayForYear = (tempsInYear) => {
+export function firstSpringDayForYear (tempsInYear) {
   const filtered = tempsInYear.filter(day => day.maxC >= 15);
 
   return filtered.length > 0 ? new Date(filtered[0].date) : "It was a very cold year... No days with temperatures above 15 degrees celsius! 0_o";
@@ -77,7 +77,7 @@ export const firstSpringDayForYear = (tempsInYear) => {
  *
  * @returns {Array}
 **/
-export const firstSpringDayPerEachYear = (yearsObj) => {
+export function firstSpringDayPerEachYear (yearsObj) {
   return Object.values(yearsObj).map(({ dataset }) => {
     return firstSpringDayForYear(dataset);
   });
@@ -91,6 +91,6 @@ export const firstSpringDayPerEachYear = (yearsObj) => {
  *
  * @returns {string}
 **/
-export const logResult = (result) => {
+export function logResult (result) {
   return `De eerste lentedag van ${result.getFullYear()} was ${result.toLocaleDateString("nl-NL")}`;
 };
