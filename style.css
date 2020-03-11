@@ -1,15 +1,15 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
 h1,
 h2,
 h3,
 p,
 td {
-  margin: 1.5rem auto;
+  margin-block: 1.5rem;
   padding: 0 1.5rem;
-  max-width: 720px;
-}
-
-td {
-  display: block;
 }
 
 .grid {
@@ -17,8 +17,10 @@ td {
   grid-auto-rows: minmax(min-content, auto);
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 10px;
-  margin: 3rem auto;
-  width: min-content;
+  margin: 1.5rem auto;
+  width: calc(100% - 3em);
+  padding-inline: 1.5em;
+  overflow: scroll;
 }
 
 .barchart {
@@ -32,20 +34,20 @@ td {
   will-change;
 }
 
-.barchart hr {
-  display: inline-block;
-  transition: background-color 250ms ease, height 250ms ease;
-  margin: 0 1px;
-  background-color: #04a;
-  padding: 0;
-  width: 8px;
-  height: 0;
-  will-change;
-}
+  .barchart hr {
+    display: inline-block;
+    transition: background-color 250ms ease, height 250ms ease;
+    margin: 0 1px;
+    background-color: #04a;
+    padding: 0;
+    width: 8px;
+    height: 0;
+    will-change;
+  }
 
-.barchart hr:hover {
-  background-color: green;
-}
+  .barchart hr:hover {
+    background-color: green;
+  }
 
 .axis-x {
   display: flex;
@@ -58,31 +60,31 @@ td {
   font-size: 10px;
 }
 
-.axis-x span {
-  position: relative;
-  left: -3px;
-  margin: 0;
-  padding: 0;
-  width: 10px;
-  line-height: 1;
-  letter-spacing: 0;
-}
+  .axis-x span {
+    position: relative;
+    left: -3px;
+    margin: 0;
+    padding: 0;
+    width: 10px;
+    line-height: 1;
+    letter-spacing: 0;
+  }
 
-.axis-x span:nth-child(2n) {
-  top: 15px;
-  left: 0;
-}
+  .axis-x span:nth-child(2n) {
+    top: 15px;
+    left: 0;
+  }
 
-.axis-x-legend {
-  display: flex;
-  grid-row: 3;
-  grid-column: 3 / -1;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-}
+  .axis-x-legend {
+    display: flex;
+    grid-row: 3;
+    grid-column: 3 / -1;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+  }
 
 .axis-y {
   display: flex;
@@ -92,11 +94,35 @@ td {
   width: 32px;
 }
 
-.axis-y-legend {
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-weight: bold;
+  .axis-y-legend {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+  }
+
+.log {
+  grid-column: 1 / -1;
 }
+
+  .log table {
+    width: 100%;
+  }
+
+  .log tr {
+  }
+
+  .log td,
+  .log th {
+    width: calc(100% / 3);
+    text-align: center;
+    padding-block: .5em;
+    border-bottom: 1px solid gray;
+  }
+
+  .log th:nth-child(1n+2),
+  .log td:nth-child(1n+2) {
+    border-left: 1px solid gray;
+  }

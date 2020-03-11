@@ -10,6 +10,8 @@
 </head>
 
 <body>
+  <h1>Eerste lentedag van elk jaar</h1>
+
   <p>
     The first spring day in the Netherlands is defined by the KNMI as the first day of the year on which the maximum
     temperature exceded 15 degrees celsius.
@@ -27,8 +29,22 @@
     </div>
   </div>
 
-  <div id="resultsLog">
-    <h2>Eerste lentedag van elk jaar</h2>
+  <div class="grid">
+    <div id="resultsLog" class="log">
+      <table>
+        <thead>
+          <th>Jaar</th><th>Aantal dagen</th><th>Datum</th>
+        </thead>
+
+        <tbody>
+          <template id="logRow">
+            <tr>
+              <td class="cellYear"></td><td class="cellDays"></td><td class="cellDate"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
