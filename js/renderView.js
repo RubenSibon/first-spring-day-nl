@@ -10,16 +10,49 @@ const ZOOM_MULTIPLIER = 4;
 const BAR_STYLES = { margin: "0 1px", width: "8px", height: 0 };
 
 // Selected elements
-const $axisY = document.querySelector("#axisY");
-const $barchart = document.querySelector("#barchart");
+const $axisX = document.querySelector("#axisX");
 
 let tempsPerDay;
 let getFirstSpringDayPerYear;
 
 /**
- * Render barchart
+ * Virtually render x-axis labels
 **/
-function shadowRenderBars (barValue, barYear) {
+function virtualXAxisLabels (barData, index) {
+  const nodeYear = document.createElement("span");
+  const twoDigitYear = barData[index].year - (barData[index].year >= 2000 ? 2000 : 1900);
+
+  nodeYear.innerHTML = `'${twoDigitYear}`;
+
+  return nodeYear;
+};
+
+/**
+ * Render x-axis
+**/
+function xAxisRender (labels) {
+  $axisX.append(...labels);
+};
+
+/**
+ * Render y-axis
+**/
+function yAxis (length) {
+  const $axisY = document.querySelector("#axisY");
+
+  $axisY.innerHTML = `<div>${length}</div> <div>0</div>`;
+};
+
+/**
+ * Virtually render a bar
+**/
+function virtualBar (barValue, barYear, nth) {
+  function removeTransitionDelay () {
+    nodeBar.style.transitionDelay = "0ms";
+
+    nodeBar.removeEventListener("transitionend", removeTransitionDelay);
+  }
+
   const nodeBar = document.createElement("hr");
 
   for (const style in BAR_STYLES) {
@@ -27,12 +60,15 @@ function shadowRenderBars (barValue, barYear) {
   }
 
   nodeBar.style.height = 0;
+  nodeBar.style.transitionDelay = `${nth * 10}ms`;
   nodeBar.setAttribute("title", barValue);
   nodeBar.setAttribute("data-year", barYear);
 
   setTimeout(() => {
     nodeBar.style.height = `${barValue * ZOOM_MULTIPLIER}px`;
-  }, 500);
+  }, 0);
+
+  nodeBar.addEventListener("transitionend", removeTransitionDelay);
 
   return nodeBar;
 };
@@ -41,20 +77,24 @@ function shadowRenderBars (barValue, barYear) {
  * Render barchart
 **/
 function barchartRender (bars, axisYLength) {
+  const $barchart = document.querySelector("#barchart");
+
   $barchart.style.width = `${getFirstSpringDayPerYear.length}px;`;
   $barchart.style.opacity = 1;
   $barchart.style.setProperty("--barchart-height", `${axisYLength * ZOOM_MULTIPLIER}px`);
 
-  $axisY.innerHTML = `<div>${axisYLength}</div> <div>0</div>`;
+  yAxis(axisYLength);
 
   $barchart.append(...bars);
+
+  barchartInteractivity($barchart);
 };
 
 /**
  * Attach barchart interactivity
 **/
-function barchartInteractivity () {
-  $barchart.addEventListener("mouseover", ({ target }) => {
+function barchartInteractivity ($element) {
+  $element.addEventListener("mouseover", ({ target }) => {
     if (target && target.title) {
       console.log(`${target.dataset.year}: ${target.title}`);
     }
@@ -70,6 +110,7 @@ function barchartInteractivity () {
 // const nodeTh = document.createElement("th");
 // const nodeTh1 = nodeTh;
 // const nodeTh2 = nodeTh;
+// const nodeTr = document.createElement("tr");
 
 // nodeTh1.innerHTML = "DAGEN T/M";
 // nodeTh1.innerHTML = "DATUM";
@@ -86,19 +127,17 @@ function barchartInteractivity () {
  * @todo Break this monster function up...
 **/
 function drawResults () {
-  const $axisX = document.querySelector("#axisX");
   const $resultsLog = document.querySelector("#resultsLog");
 
+  const barData = [];
   const nodeBars = [];
+  const xAxisLabels = [];
 
-  let barData = [];
   let axisYDays = 0;
 
   // Make and append a new bar for each data point.
   for (let index = 0; index < getFirstSpringDayPerYear.length; index++) {
     const firstSpringDay = getFirstSpringDayPerYear[index];
-
-    const nodeTr = document.createElement("tr");
 
     const year = firstSpringDay.getFullYear();
     const month = firstSpringDay.getMonth();
@@ -120,12 +159,6 @@ function drawResults () {
       value,
     });
 
-    // X-axis: years
-    const nodeYear = document.createElement("span");
-    const twoDigitYear = barData[index].year - (barData[index].year >= 2000 ? 2000 : 1900);
-    nodeYear.innerHTML = `'${twoDigitYear}`;
-    $axisX.appendChild(nodeYear);
-
     // Log result to page in a table.
     const nodeLog = document.createElement("p");
     nodeLog.innerHTML = logResult(firstSpringDay);
@@ -135,14 +168,16 @@ function drawResults () {
     $resultsLog.appendChild(nodeLog);
     $resultsLog.appendChild(nodeDataTd);
 
-    nodeBar = shadowRenderBars(value, barData[index].year);
+    nodeBar = virtualBar(value, barData[index].year, index);
 
     // Add the bar to the chart.
+    xAxisLabels.push(virtualXAxisLabels(barData, index));
     nodeBars.push(nodeBar);
+
   }
 
+  xAxisRender(xAxisLabels);
   barchartRender(nodeBars, axisYDays);
-  barchartInteractivity();
 };
 
 /**
