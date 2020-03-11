@@ -10,16 +10,52 @@ const ZOOM_MULTIPLIER = 4;
 const BAR_STYLES = { margin: "0 1px", width: "8px", height: 0 };
 
 // Selected elements
-const $axisY = document.querySelector("#axisY");
-const $barchart = document.querySelector("#barchart");
+const $axisX = document.querySelector("#axisX");
+const $template = document.querySelector('#logRow');
+const $resultsLog = document.querySelector("#resultsLog");
+const $tbody = $resultsLog.querySelector('tbody');
 
 let tempsPerDay;
 let getFirstSpringDayPerYear;
 
 /**
- * Render barchart
+ * Virtually render x-axis labels
 **/
-function shadowRenderBars (barValue, barYear) {
+function virtualXAxisLabels (barData, index) {
+  const nodeYear = document.createElement("span");
+  const twoDigitYear = barData[index].year - (barData[index].year >= 2000 ? 2000 : 1900);
+
+  nodeYear.textContent = `'${twoDigitYear}`;
+
+  return nodeYear;
+}
+
+/**
+ * Render x-axis
+**/
+function renderXAxis (labels) {
+  $axisX.append(...labels);
+}
+
+/**
+ * Render y-axis
+**/
+function renderYAxis (length) {
+  const $axisY = document.querySelector("#axisY");
+
+  $axisY.innerHTML = `<div>${length}</div> <div>0</div>`;
+}
+
+/**
+ * Virtually render a bar
+**/
+function virtualBar (barValue, barYear, nth) {
+  function removeTransitionDelay () {
+    nodeBar.style.transitionDelay = "0ms";
+
+    nodeBar.removeEventListener("transitionend", removeTransitionDelay);
+  }
+
   const nodeBar = document.createElement("hr");
 
   for (const style in BAR_STYLES) {
@@ -27,54 +63,72 @@ function shadowRenderBars (barValue, barYear) {
   }
 
   nodeBar.style.height = 0;
+  nodeBar.style.transitionDelay = `${nth * 10}ms`;
   nodeBar.setAttribute("title", barValue);
   nodeBar.setAttribute("data-year", barYear);
 
   setTimeout(() => {
     nodeBar.style.height = `${barValue * ZOOM_MULTIPLIER}px`;
-  }, 500);
+  }, 0);
+
+  nodeBar.addEventListener("transitionend", removeTransitionDelay);
 
   return nodeBar;
-};
+}
 
 /**
  * Render barchart
 **/
-function barchartRender (bars, axisYLength) {
+function renderBarchart (bars, axisYLength) {
+  const $barchart = document.querySelector("#barchart");
+
   $barchart.style.width = `${getFirstSpringDayPerYear.length}px;`;
   $barchart.style.opacity = 1;
   $barchart.style.setProperty("--barchart-height", `${axisYLength * ZOOM_MULTIPLIER}px`);
 
-  $axisY.innerHTML = `<div>${axisYLength}</div> <div>0</div>`;
+  renderYAxis(axisYLength);
 
   $barchart.append(...bars);
-};
+
+  interactiveBarchart($barchart);
+}
 
 /**
  * Attach barchart interactivity
 **/
-function barchartInteractivity () {
-  $barchart.addEventListener("mouseover", ({ target }) => {
+function interactiveBarchart ($element) {
+  $element.addEventListener("mouseover", ({ target }) => {
     if (target && target.title) {
       console.log(`${target.dataset.year}: ${target.title}`);
     }
   });
-};
+}
 
 /**
- * Render table
+ * Virtually render table
 **/
 // @todo Create table with data ("Number of days since January 1st" and "Date of first spring day" in two columns)
-// const nodeTable = document.createElement("table");
-// const nodeThead = document.createElement("thead");
-// const nodeTh = document.createElement("th");
-// const nodeTh1 = nodeTh;
-// const nodeTh2 = nodeTh;
+function virtualTable (year, value, firstSpringDay) {
+  return {
+    cellYear: year,
+    cellDays: value,
+    cellDate: firstSpringDay.toLocaleDateString("nl-NL"),
+  }
+}
 
-// nodeTh1.innerHTML = "DAGEN T/M";
-// nodeTh1.innerHTML = "DATUM";
-// nodeThead.innerHTML = nodeTh;
-// nodeTable.innerHTML = nodeThead;
+/**
+ * Render log table
+**/
+function renderTable (tableRows) {
+  const $templateClone = $template.content.cloneNode(true);
+  const tds = $templateClone.querySelectorAll("td");
+
+  Object.values(tableRows).forEach((cell, index) => {
+    tds[index].textContent = cell;
+  });
+
+  $tbody.appendChild($templateClone);
+}
 
 /**
  * Attach table interactivity
@@ -86,19 +140,15 @@ function barchartInteractivity () {
  * @todo Break this monster function up...
 **/
 function drawResults () {
-  const $axisX = document.querySelector("#axisX");
-  const $resultsLog = document.querySelector("#resultsLog");
-
+  const barData = [];
   const nodeBars = [];
+  const xAxisLabels = [];
 
-  let barData = [];
   let axisYDays = 0;
 
   // Make and append a new bar for each data point.
   for (let index = 0; index < getFirstSpringDayPerYear.length; index++) {
     const firstSpringDay = getFirstSpringDayPerYear[index];
-
-    const nodeTr = document.createElement("tr");
 
     const year = firstSpringDay.getFullYear();
     const month = firstSpringDay.getMonth();
@@ -120,30 +170,17 @@ function drawResults () {
       value,
     });
 
-    // X-axis: years
-    const nodeYear = document.createElement("span");
-    const twoDigitYear = barData[index].year - (barData[index].year >= 2000 ? 2000 : 1900);
-    nodeYear.innerHTML = `'${twoDigitYear}`;
-    $axisX.appendChild(nodeYear);
+    // Add the bar to the virtual chart.
+    xAxisLabels.push(virtualXAxisLabels(barData, index));
+    nodeBars.push(virtualBar(value, barData[index].year, index));
 
-    // Log result to page in a table.
-    const nodeLog = document.createElement("p");
-    nodeLog.innerHTML = logResult(firstSpringDay);
-
-    const nodeDataTd = document.createElement("td");
-    nodeDataTd.innerHTML = `${value}, ${firstSpringDay.toLocaleDateString("nl-NL")}`;
-    $resultsLog.appendChild(nodeLog);
-    $resultsLog.appendChild(nodeDataTd);
-
-    nodeBar = shadowRenderBars(value, barData[index].year);
-
-    // Add the bar to the chart.
-    nodeBars.push(nodeBar);
+    // Add a row with logged values to the virtual table.
+    renderTable(virtualTable(year, value, firstSpringDay));
   }
 
-  barchartRender(nodeBars, axisYDays);
-  barchartInteractivity();
-};
+  renderXAxis(xAxisLabels);
+  renderBarchart(nodeBars, axisYDays);
+}
 
 /**
  * Initialize render after getting the dataset.
